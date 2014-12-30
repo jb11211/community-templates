@@ -29,3 +29,11 @@ write_files:
     path: /home/core/cloud-config.yml
     permissions: '0600'
     owner: core:core
+<% if (proxy = @host.params["http_proxy"]) then no_proxy = "" -%>
+  - path: /etc/wgetrc
+    owner: root:root
+    permissions: 0644
+    content: |
+      http_proxy = <%= proxy %>
+      no_proxy = localhost,127.0.0.0/8,*.local,*.<%= @host.domain.name -%>,puppet
+<% end -%>

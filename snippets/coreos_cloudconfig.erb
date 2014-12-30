@@ -44,3 +44,25 @@ name: coreos_cloudconfig
       - "<%= ssh_key %>"
   <% end -%>
 <% end -%>
+      write_files:
+<% if (proxy = @host.params["http_proxy"]) then no_proxy = "" -%>
+      - path: /etc/wgetrc
+        owner: root:root
+        permissions: 0644
+        content: |
+          http_proxy = <%= proxy %>
+          no_proxy = localhost,127.0.0.0/8,*.local,*.<%= @host.domain.name -%>,puppet
+      - path: /etc/profile.d/proxy.sh
+        owner: root:root
+        permissions: 0755
+        content: |
+          export http_proxy="<%= proxy %>"
+          export HTTP_PROXY="<%= proxy %>"
+          export no_proxy="localhost,127.0.0.0/8,*.local,*.<%= @host.domain.name -%>,puppet"
+      - path: /etc/systemd/system/docker.service.d/http-proxy.conf
+        owner: core:core
+        permissions: 0644
+        content: |
+          [Service]
+          Environment="HTTP_PROXY=<%= proxy %>"
+<% end -%>

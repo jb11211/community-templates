@@ -11,6 +11,18 @@ name: coreos_cloudconfig
           addr: <%= @host.ip %>:4001
           peer-addr: <%= @host.ip %>:7001
         units:
+<% if @static -%>
+           - name: 00-eth0.network
+             runtime: true
+             content: |
+              [Match]
+              Name=eth0
+
+              [Network]
+              DNS=<%= [@host.subnet.dns_primary,@host.subnet.dns_secondary].reject{|n| n.blank?}.join(' ') %>
+              Address=<%= @host.ip %>/<%= @host.subnet.mask %>
+              Gateway=<%= @host.subnet.gateway %>
+<% end -%>
           - name: etcd.service
             command: start
           - name: fleet.service
